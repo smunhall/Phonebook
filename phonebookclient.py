@@ -5,6 +5,7 @@ Project: Phonebook client server program
 Client for a phone book application.
 Sends the commands ADD <name> <number> or FIND <name> to the server.
 
+update
 """
 
 from socket import *
@@ -52,10 +53,10 @@ class PhonebookClient(EasyFrame):
         """Looks up a name in the phone book."""
         name = self.prompterBox(promptString = "Enter the name.")
         if name == "": return
-        self.server.send(bytes("FIND " + name))
-        reply = decode(self.server.recv(BUFSIZE))
+        self.server.send(bytes("FIND " + name, CODE))
+        reply = decode(self.server.recv(BUFSIZE), CODE)
         if not reply:
-            self.messageBox(message = "Server diconnected")
+            self.messageBox(message = "Server disconnected")
             self.disconnect()
         else:
             self.statusLabel["text"] = reply
@@ -66,10 +67,10 @@ class PhonebookClient(EasyFrame):
         if name == "": return
         number = self.prompterBox(promptString = "Enter the number.")
         if number == "": return
-        self.server.send(bytes("ADD " + name + " " + number))
-        reply = decode(self.server.recv(BUFSIZE))
+        self.server.send(bytes("ADD " + name + " " + number, CODE))
+        reply = decode(self.server.recv(BUFSIZE), CODE)
         if not reply:
-            self.messageBox(message = "Server diconnected")
+            self.messageBox(message = "Server disconnected")
             self.disconnect()
         else:
             self.statusLabel["text"] = reply
@@ -80,7 +81,7 @@ class PhonebookClient(EasyFrame):
         self.server.connect(ADDRESS)
         start_book = self.server.recv(1024).decode()
         self.outputArea.setText(start_book)
-        self.statusLabel["text"] = decode(self.server.recv(BUFSIZE))
+        self.statusLabel["text"] = decode(self.server.recv(BUFSIZE), CODE)
         self.connectBtn["text"] = "Disconnect"
         self.connectBtn["command"] = self.disconnect
         self.findBtn["state"] = "normal"

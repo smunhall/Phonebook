@@ -23,9 +23,9 @@ class PhonebookClientHandler(Thread):
         self.phonebook = phonebook
    
     def run(self):
-        self.client.send(bytes("Welcome to the phone book application!"))
+        self.client.send(bytes("Welcome to the phone book application!", CODE))
         while True:
-            message = decode(self.client.recv(BUFSIZE))
+            message = decode(self.client.recv(BUFSIZE), CODE)
             if not message:
                 print("Client disconnected")
                 self.client.close()
@@ -49,6 +49,6 @@ class PhonebookClientHandler(Thread):
                     phonebook_file.close()
 
                     reply = "Name and number added to phone book and file."
-                self.client.send(bytes(reply))
+                self.client.send(bytes(reply, CODE))
 
 
