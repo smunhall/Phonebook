@@ -15,17 +15,17 @@ CODE = "ascii" # You can specify other encoding, such as UTF-8 for non-English c
 
 class PhonebookClientHandler(Thread):
     """Handles a phonebook requests from a client."""
-    
+
     def __init__(self, client, phonebook):
         """Saves references to the client socket and phonebook."""
         Thread.__init__(self)
         self.client = client
         self.phonebook = phonebook
-   
+
     def run(self):
 
         # This block was moved from server file to try and make it handled here instead
-        phonebook = Phonebook()  # called from the phonebook.py
+        # phonebook = Phonebook()  # called from the phonebook.py
         filename = "Phonebook.txt"
         while True:
             try:
@@ -34,7 +34,7 @@ class PhonebookClientHandler(Thread):
                 contents = file.readlines()
                 for line in contents:
                     information = line.split(" ")  # This splits each line of the text file by spaces
-                    person = phonebook.add(information[0], information[1])
+                    self.phonebook.add(information[0], information[1])
                 break
             except ReferenceError:
                 print("File not found, do better next time.")
@@ -42,7 +42,7 @@ class PhonebookClientHandler(Thread):
         # End of test block
 
         # create string of phonebook to send to client on connection
-        start_book = phonebook.__str__()
+        start_book = self.phonebook.__str__()
         self.client.send(bytes(start_book.encode()))
 
         self.client.send(bytes("Welcome to the phone book application!", CODE))
