@@ -15,7 +15,7 @@ import re
 import os
 
 HOST = "localhost" # in your project, make the HOST IP to be dynamic - get it from the OS
-PORT = 5001
+PORT = 5000
 BUFSIZE = 1024
 ADDRESS = (HOST, PORT)
 CODE = "ascii"
@@ -95,6 +95,7 @@ class PhonebookClient(EasyFrame):
         self.connectBtn["command"] = self.connect
         self.findBtn["state"] = "disabled"
         self.addBtn["state"] = "disabled"
+
 
 def main():
     """Instantiate and pop up the window."""

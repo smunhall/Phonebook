@@ -11,7 +11,7 @@ from phonebookclienthandler import PhonebookClientHandler
 
 # In this example, it is set to local host
 HOST = "localhost"
-PORT = 5001
+PORT = 5000
 ADDRESS = (HOST, PORT)
 
 phonebook = Phonebook() # called from the phonebook.py
