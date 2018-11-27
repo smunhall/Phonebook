@@ -23,6 +23,28 @@ class PhonebookClientHandler(Thread):
         self.phonebook = phonebook
    
     def run(self):
+
+        # This block was moved from server file to try and make it handled here instead
+        phonebook = Phonebook()  # called from the phonebook.py
+        filename = "Phonebook.txt"
+        while True:
+            try:
+                file = open(filename, "r")  # opens in read only
+                print("File found")
+                contents = file.readlines()
+                for line in contents:
+                    information = line.split(" ")  # This splits each line of the text file by spaces
+                    person = phonebook.add(information[0], information[1])
+                break
+            except ReferenceError:
+                print("File not found, do better next time.")
+                filename = input("Please enter the name of the phonebook to be loaded: ")
+        # End of test block
+
+        # create string of phonebook to send to client on connection
+        start_book = phonebook.__str__()
+        self.client.send(bytes(start_book.encode()))
+
         self.client.send(bytes("Welcome to the phone book application!", CODE))
         while True:
             message = decode(self.client.recv(BUFSIZE), CODE)
@@ -48,7 +70,7 @@ class PhonebookClientHandler(Thread):
                     phonebook_file.write(request[1] + " " + request[2] + "\n")
                     phonebook_file.close()
 
-                    reply = "Name and number added to phone book and file."
+                    reply = "Name and number added to phone book and file.\nReconnect to update table below."
                 self.client.send(bytes(reply, CODE))
 
 

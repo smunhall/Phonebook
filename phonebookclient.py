@@ -24,7 +24,7 @@ CODE = "ascii"
 class PhonebookClient(EasyFrame):
     """GUI for the client app."""
 
-    COLOR = "#CCCCFF"
+    COLOR = "#CCCCCC"
 
     def __init__(self):
         """Initialize the frame and widgets."""
@@ -79,7 +79,7 @@ class PhonebookClient(EasyFrame):
         """Starts a new session with the doctor."""
         self.server = socket(AF_INET, SOCK_STREAM)
         self.server.connect(ADDRESS)
-        start_book = self.server.recv(1024).decode()
+        start_book = self.server.recv(BUFSIZE).decode()
         self.outputArea.setText(start_book)
         self.statusLabel["text"] = decode(self.server.recv(BUFSIZE), CODE)
         self.connectBtn["text"] = "Disconnect"
