@@ -10,7 +10,7 @@ from threading import Thread
 from phonebook import Phonebook
 
 BUFSIZE = 1024
-CODE = "ascii" # You can specify other encoding, such as UTF-8 for non-English characters
+CODE = "ascii"  # You can specify other encoding, such as UTF-8 for non-English characters
 
 
 class PhonebookClientHandler(Thread):
@@ -72,5 +72,3 @@ class PhonebookClientHandler(Thread):
 
                     reply = "Name and number added to phone book and file.\nReconnect to update table below."
                 self.client.send(bytes(reply, CODE))
-
-

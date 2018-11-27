@@ -27,8 +27,8 @@ class Phonebook(object):
     def __str__(self):
         """Returns the string representation of the phone book."""
         result = ""
-        keys = list(self.entries.keys()) # read the phonebook into a list
-        keys.sort() # sort the list
+        keys = list(self.entries.keys())  # read the phonebook into a list
+        keys.sort()  # sort the list
         for key in keys:
             result += key + ":" + self.entries[key]
         return result
@@ -39,7 +39,7 @@ def main():
         Testing function for PhoneBook.
         The main function is not meant to be called directly from the other programs
     """
-    book = Phonebook() # instantiate the phonebook class into a phonebook object
+    book = Phonebook()  # instantiate the phonebook class into a phonebook object
     for name in range(10):
         # This loop is for testing purpose
         # in actual phone book app, this main is not called
@@ -48,6 +48,7 @@ def main():
     print(book)
     for name in range(10):
         print(book.get("Name" + str(name)))
+
 
 if __name__ == "__main__":
     main()

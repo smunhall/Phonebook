@@ -14,7 +14,7 @@ HOST = "localhost"
 PORT = 5000
 ADDRESS = (HOST, PORT)
 
-phonebook = Phonebook() # called from the phonebook.py
+phonebook = Phonebook()  # called from the phonebook.py
 server = socket(AF_INET, SOCK_STREAM)
 server.bind(ADDRESS)
 server.listen(5)
