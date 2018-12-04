@@ -4,12 +4,15 @@ Project 10.5
 Client handler for phonebook.
 """
 
-from socket import *
+import base64
 from codecs import decode
 from threading import Thread
-from phonebook import Phonebook
+from Crypto import Random
+from Crypto.Cipher import AES
 
+BLOCK_SIZE = 16
 BUFSIZE = 1024
+PASSPHRASE = b"1234567890123456"
 CODE = "ascii"  # You can specify other encoding, such as UTF-8 for non-English characters
 
 
@@ -22,8 +25,19 @@ class PhonebookClientHandler(Thread):
         self.client = client
         self.phonebook = phonebook
 
-    def run(self):
+    def encrypt(self, message, passphrase):
+        """Used to encrypt data to be sent."""
+        iv = Random.new().read(BLOCK_SIZE)
+        aes = AES.new(passphrase, AES.MODE_CFB, iv)
+        return base64.b64encode(aes.encrypt(message))
 
+    def decrypt(self, encrypted, passphrase):
+        """Used to decrypt data received."""
+        iv = Random.new().read(BLOCK_SIZE)
+        aes = AES.new(passphrase, AES.MODE_CFB, iv)
+        return aes.decrypt(base64.b64decode(encrypted))
+
+    def run(self):
         # This block was moved from server file to try and make it handled here instead
         # phonebook = Phonebook()  # called from the phonebook.py
         filename = "Phonebook.txt"
@@ -43,11 +57,12 @@ class PhonebookClientHandler(Thread):
 
         # create string of phonebook to send to client on connection
         start_book = self.phonebook.__str__()
-        self.client.send(bytes(start_book.encode()))
+        start_book_encrypted = self.encrypt(bytes(start_book, "ascii"), PASSPHRASE)  # pass bytes into encode method
+        self.client.send(start_book_encrypted)  # DATA SENT NEED ENCRYPTION
 
-        self.client.send(bytes("Welcome to the phone book application!", CODE))
+        self.client.send(bytes("Welcome to the phone book application!", CODE))  # This doesn't need encryption
         while True:
-            message = decode(self.client.recv(BUFSIZE), CODE)
+            message = decode(self.client.recv(BUFSIZE), CODE)  # DATA RECEIVED NEED DECRYPTION
             if not message:
                 print("Client disconnected")
                 self.client.close()
@@ -71,4 +86,4 @@ class PhonebookClientHandler(Thread):
                     phonebook_file.close()
 
                     reply = "Name and number added to phone book and file.\nReconnect to update table below."
-                self.client.send(bytes(reply, CODE))
+                self.client.send(self.encrypt(bytes(reply, CODE), PASSPHRASE))  # doesn't need encryption

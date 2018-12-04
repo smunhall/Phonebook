@@ -8,15 +8,18 @@ Sends the commands ADD <name> <number> or FIND <name> to the server.
 update
 """
 
-from socket import *
+import base64
 from codecs import decode
+from socket import *
+from Crypto import Random
+from Crypto.Cipher import AES
 from breezypythongui import EasyFrame
-import re
-import os
 
 HOST = "localhost"  # in your project, make the HOST IP to be dynamic - get it from the OS
 PORT = 5000
 BUFSIZE = 1024
+BLOCK_SIZE = 16
+PASSPHRASE = b"1234567890123456"
 ADDRESS = (HOST, PORT)
 CODE = "ascii"
 
@@ -49,12 +52,28 @@ class PhonebookClient(EasyFrame):
                                            columnspan=3,
                                            width=50, height=4)
 
+    def encrypt(self, message, passphrase):
+        iv = Random.new().read(BLOCK_SIZE)
+        aes = AES.new(passphrase, AES.MODE_CFB, iv)
+        return base64.b64encode(aes.encrypt(message))
+
+    def decrypt(self, encrypted, passphrase):
+        iv = Random.new().read(BLOCK_SIZE)
+        aes = AES.new(passphrase, AES.MODE_CFB, iv)
+        return aes.decrypt(base64.b64decode(encrypted))
+
     def find(self):
         """Looks up a name in the phone book."""
         name = self.prompterBox(promptString="Enter the name.")
         if name == "": return
-        self.server.send(bytes("FIND " + name, CODE))
-        reply = decode(self.server.recv(BUFSIZE), CODE)
+        # find_command = "FIND"
+        # find_command = bytes(find_command, "ascii")
+        # space_separator = " "
+        # space_separator = bytes(space_separator, "ascii")
+        # name = bytes(name, "ascii")
+        # data_to_send = (find_command + space_separator + name)
+        self.server.send(bytes("FIND " + name, CODE))  # doesn't need encryption
+        reply = self.decrypt(decode(self.server.recv(BUFSIZE), CODE), PASSPHRASE)  # DATA RECEIVED NEED DECRYPTION
         if not reply:
             self.messageBox(message="Server disconnected")
             self.disconnect()
@@ -67,8 +86,8 @@ class PhonebookClient(EasyFrame):
         if name == "": return
         number = self.prompterBox(promptString="Enter the number.")
         if number == "": return
-        self.server.send(bytes("ADD " + name + " " + number, CODE))
-        reply = decode(self.server.recv(BUFSIZE), CODE)
+        self.server.send(self.encrypt(bytes("ADD " + name + " " + number, CODE), PASSPHRASE))  # DATA NEED ENCRYPTION
+        reply = decode(self.server.recv(BUFSIZE), CODE)  # DATA RECEIVED NEED ENCRYPTION
         if not reply:
             self.messageBox(message="Server disconnected")
             self.disconnect()
@@ -79,9 +98,10 @@ class PhonebookClient(EasyFrame):
         """Starts a new session with the doctor."""
         self.server = socket(AF_INET, SOCK_STREAM)
         self.server.connect(ADDRESS)
-        start_book = self.server.recv(BUFSIZE).decode()
-        self.outputArea.setText(start_book)
-        self.statusLabel["text"] = decode(self.server.recv(BUFSIZE), CODE)
+        start_book = decode(self.server.recv(BUFSIZE))  # DATA RECEIVED NEED DECRYPTION
+        start_book_decrypted = self.decrypt(start_book, PASSPHRASE)
+        self.outputArea.setText(start_book_decrypted)
+        self.statusLabel["text"] = decode(self.server.recv(BUFSIZE), CODE)  # DATA RECEIVED NEED DECRYPTION
         self.connectBtn["text"] = "Disconnect"
         self.connectBtn["command"] = self.disconnect
         self.findBtn["state"] = "normal"
