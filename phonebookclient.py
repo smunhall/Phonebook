@@ -66,13 +66,7 @@ class PhonebookClient(EasyFrame):
         """Looks up a name in the phone book."""
         name = self.prompterBox(promptString="Enter the name.")
         if name == "": return
-        # find_command = "FIND"
-        # find_command = bytes(find_command, "ascii")
-        # space_separator = " "
-        # space_separator = bytes(space_separator, "ascii")
-        # name = bytes(name, "ascii")
-        # data_to_send = (find_command + space_separator + name)
-        self.server.send(bytes("FIND " + name, CODE))  # doesn't need encryption
+        self.server.send(bytes("FIND " + name, CODE))
         reply = self.decrypt(decode(self.server.recv(BUFSIZE), CODE), PASSPHRASE)  # DATA RECEIVED NEED DECRYPTION
         if not reply:
             self.messageBox(message="Server disconnected")
@@ -86,8 +80,8 @@ class PhonebookClient(EasyFrame):
         if name == "": return
         number = self.prompterBox(promptString="Enter the number.")
         if number == "": return
-        self.server.send(self.encrypt(bytes("ADD " + name + " " + number, CODE), PASSPHRASE))  # DATA NEED ENCRYPTION
-        reply = decode(self.server.recv(BUFSIZE), CODE)  # DATA RECEIVED NEED ENCRYPTION
+        self.server.send(bytes("ADD " + name + " " + number, CODE))  # DATA NEED ENCRYPTION
+        reply = self.decrypt(decode(self.server.recv(BUFSIZE), CODE), PASSPHRASE)  # DATA RECEIVED NEED ENCRYPTION
         if not reply:
             self.messageBox(message="Server disconnected")
             self.disconnect()
@@ -99,9 +93,9 @@ class PhonebookClient(EasyFrame):
         self.server = socket(AF_INET, SOCK_STREAM)
         self.server.connect(ADDRESS)
         start_book = decode(self.server.recv(BUFSIZE))  # DATA RECEIVED NEED DECRYPTION
-        start_book_decrypted = self.decrypt(start_book, PASSPHRASE)
+        start_book_decrypted = self.decrypt(start_book, PASSPHRASE)  # Decrypts the phonebook
         self.outputArea.setText(start_book_decrypted)
-        self.statusLabel["text"] = decode(self.server.recv(BUFSIZE), CODE)  # DATA RECEIVED NEED DECRYPTION
+        self.statusLabel["text"] = decode(self.server.recv(BUFSIZE), CODE)
         self.connectBtn["text"] = "Disconnect"
         self.connectBtn["command"] = self.disconnect
         self.findBtn["state"] = "normal"
